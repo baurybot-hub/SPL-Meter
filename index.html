@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1410">
+    <meta name="description" content="Dr. Eule SPL Meter - Professionelles Schallpegelmessgerät von Doktor Eule">
+    <title>🦉 Dr. Eule SPL Meter</title>
+    <style>
+        :root {
+            --bg-dark: #1a1410;
+            --bg-wood: #2d2419;
+            --brass: #d4af37;
+            --brass-dark: #a68b2a;
+            --brass-light: #f4cf5d;
+            --red: #d32f2f;
+            --orange: #ff8c00;
+            --yellow: #ffd700;
+            --green: #4caf50;
+            --text: #f5e6d3;
+            --shadow: rgba(0, 0, 0, 0.6);
+            --glow: rgba(212, 175, 55, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #0d0a08 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 72px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 5px 15px rgba(212, 175, 55, 0.3));
+            animation: owlBlink 5s infinite;
+        }
+
+        @keyframes owlBlink {
+            0%, 100% { transform: scale(1); }
+            48%, 52% { transform: scale(0.95); }
+            50% { transform: scale(1.05); }
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--brass-light);
+            text-shadow: 2px 2px 8px var(--shadow);
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--brass);
+            font-style: italic;
+            letter-spacing: 3px;
+        }
+
+        .meter-frame {
+            background: linear-gradient(145deg, #3d3126, var(--bg-wood));
+            border: 6px solid var(--brass);
+            border-radius: 30px;
+            padding: 30px 20px;
+            box-shadow: 
+                0 20px 60px var(--shadow),
+                inset 0 2px 10px rgba(0, 0, 0, 0.5),
+                inset 0 -2px 10px rgba(255, 255, 255, 0.1);
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .meter-frame::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 30px;
+            background: linear-gradient(145deg, var(--brass-light), var(--brass-dark));
+            z-index: -1;
+        }
+
+        .meter-display {
+            background: radial-gradient(circle at center, #f5ebe0 0%, #e8dcc8 100%);
+            border-radius: 20px;
+            padding: 30px 20px;
+            position: relative;
+            box-shadow: inset 0 3px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .meter-scale {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            margin: 20px 0;
+        }
+
+        .gauge-arc {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            height: 140px;
+        }
+
+        .scale-marks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            bottom: 0;
+            left: 0;
+        }
+
+        .scale-mark {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform-origin: bottom center;
+            height: 140px;
+            width: 2px;
+        }
+
+        .scale-mark::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 2px;
+            height: 12px;
+            background: #555;
+        }
+
+        .scale-mark.major::before {
+            height: 25px;
+            width: 3px;
+            background: #000;
+        }
+
+        .scale-mark.minor::before {
+            height: 18px;
+            width: 2.5px;
+            background: #333;
+        }
+
+        .scale-label {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: 700;
+            color: #333;
+            font-family: 'Courier New', monospace;
+        }
+
+        .needle-pivot {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, var(--brass-light), var(--brass-dark));
+            border-radius: 50%;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .needle {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(-90deg);
+            width: 4px;
+            height: 130px;
+            background: linear-gradient(to top, var(--brass-dark), var(--red));
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(211, 47, 47, 0.5);
+            z-index: 5;
+            will-change: transform;
+        }
+
+        .needle::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 12px solid var(--red);
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+        }
+
+        .color-zones {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            bottom: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .zone {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform-origin: bottom center;
+            height: 110px;
+            width: 30px;
+            opacity: 0.15;
+        }
+
+        .db-readout {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .db-value-display {
+            font-size: 56px;
+            font-weight: 700;
+            color: #2d2419;
+            font-family: 'Courier New', monospace;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            line-height: 1;
+        }
+
+        .db-unit {
+            font-size: 24px;
+            color: #666;
+        }
+
+        .weighting-badge {
+            display: inline-block;
+            background: var(--brass);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats-panel {
+            background: var(--bg-wood);
+            border: 3px solid var(--brass-dark);
+            border-radius: 15px;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px var(--shadow);
+        }
+
+        .stat-box {
+            text-align: center;
+            background: rgba(245, 230, 211, 0.1);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--brass);
+            margin-bottom: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--brass-light);
+            font-family: 'Courier New', monospace;
+        }
+
+        .controls {
+            background: var(--bg-wood);
+            border: 3px solid var(--brass-dark);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px var(--shadow);
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .control-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: 3px solid var(--brass);
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Georgia', serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-start {
+            background: linear-gradient(145deg, var(--green), #388e3c);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.5);
+        }
+
+        .btn-stop {
+            background: linear-gradient(145deg, var(--red), #c62828);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(145deg, var(--brass-light), var(--brass-dark));
+            color: #000;
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px var(--glow);
+        }
+
+        .btn-preset {
+            padding: 10px;
+            font-size: 13px;
+        }
+
+        .settings {
+            background: var(--bg-wood);
+            border: 3px solid var(--brass-dark);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px var(--shadow);
+        }
+
+        .setting-group {
+            margin-bottom: 18px;
+        }
+
+        .setting-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .setting-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--brass);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .setting-value {
+            color: var(--brass-light);
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(245, 230, 211, 0.15);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--brass);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--brass-light);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--brass);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--brass-light);
+        }
+
+        .switch-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .switch-btn {
+            flex: 1;
+            padding: 12px;
+            background: rgba(245, 230, 211, 0.1);
+            border: 2px solid var(--brass-dark);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Georgia', serif;
+        }
+
+        .switch-btn.active {
+            background: var(--brass);
+            color: #000;
+            border-color: var(--brass-light);
+            box-shadow: 0 0 15px var(--glow);
+        }
+
+        .calibration {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .calibration input {
+            flex: 1;
+            padding: 12px;
+            background: rgba(245, 230, 211, 0.15);
+            border: 2px solid var(--brass-dark);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 15px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+
+        .calibration input:focus {
+            outline: none;
+            border-color: var(--brass-light);
+            box-shadow: 0 0 10px var(--glow);
+        }
+
+        .alert {
+            background: linear-gradient(145deg, #d32f2f, #b71c1c);
+            border: 3px solid var(--brass);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+            animation: alertPulse 1.5s infinite;
+            box-shadow: 0 5px 20px rgba(211, 47, 47, 0.5);
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.02); opacity: 0.9; }
+        }
+
+        .alert-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .status {
+            text-align: center;
+            padding: 12px;
+            font-size: 13px;
+            color: var(--brass);
+            font-style: italic;
+        }
+
+        .status.active {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .status.error {
+            color: var(--red);
+            font-weight: 700;
+        }
+
+        .reference-guide {
+            background: rgba(245, 230, 211, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .reference-guide h3 {
+            font-size: 13px;
+            margin-bottom: 12px;
+            color: var(--brass-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--brass-dark);
+            padding-bottom: 8px;
+        }
+
+        .reference-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            font-size: 12px;
+        }
+
+        .reference-item:last-child {
+            border-bottom: none;
+        }
+
+        .reference-label {
+            color: var(--text);
+        }
+
+        .reference-value {
+            color: var(--brass-light);
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .collapsible {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .collapsible.open {
+            max-height: 500px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 12px 0;
+            border-bottom: 2px solid var(--brass-dark);
+            margin-bottom: 15px;
+        }
+
+        .section-header h3 {
+            font-size: 13px;
+            color: var(--brass-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-toggle {
+            color: var(--brass);
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+
+        .section-toggle.open {
+            transform: rotate(180deg);
+        }
+
+        .footer {
+            background: var(--bg-wood);
+            border: 3px solid var(--brass-dark);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 5px 20px var(--shadow);
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .made-by {
+            font-size: 13px;
+            color: var(--text);
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        .spotify-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(145deg, #1DB954, #1ed760);
+            color: #000;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.4);
+            border: 2px solid var(--brass-dark);
+        }
+
+        .spotify-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.6);
+            background: linear-gradient(145deg, #1ed760, #1DB954);
+        }
+
+        .spotify-icon {
+            font-size: 20px;
+        }
+
+        .footer-note {
+            font-size: 11px;
+            color: var(--brass);
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 60px;
+            }
+            .title {
+                font-size: 28px;
+            }
+            .db-value-display {
+                font-size: 48px;
+            }
+            .gauge-arc {
+                width: 240px;
+                height: 120px;
+            }
+            .needle {
+                height: 110px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🦉</div>
+            <div class="title">DR. EULE</div>
+            <div class="subtitle">SPL Meter Pro</div>
+        </div>
+
+        <div class="alert" id="alert">
+            <div class="alert-text">⚠️ ACHTUNG: Schallpegel über 85 dB! Gehörschutz tragen!</div>
+        </div>
+
+        <div class="meter-frame">
+            <div class="meter-display">
+                <div class="meter-scale">
+                    <svg class="gauge-arc" viewBox="0 0 280 140" style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);">
+                        <path d="M 20 140 A 120 120 0 0 1 260 140" 
+                              fill="none" 
+                              stroke="rgba(0,0,0,0.2)" 
+                              stroke-width="2"/>
+                    </svg>
+                    
+                    <div class="color-zones">
+                        <div class="zone" style="transform: translateX(-50%) rotate(-90deg); background: var(--green);"></div>
+                        <div class="zone" style="transform: translateX(-50%) rotate(-70deg); background: var(--green);"></div>
+                        <div class="zone" style="transform: translateX(-50%) rotate(-50deg); background: var(--green);"></div>
+                        <div class="zone" style="transform: translateX(-50%) rotate(-30deg); background: var(--yellow);"></div>
+                        <div class="zone" style="transform: translateX(-50%) rotate(-10deg); background: var(--yellow);"></div>
+                        <div class="zone" style="transform: translateX(-50%) rotate(10deg); background: var(--orange);"></div>
+                        <div class="zone" style="transform: translateX(-50%) rotate(30deg); background: var(--orange);"></div>
+                        <div class="zone" style="transform: translateX(-50%) rotate(50deg); background: var(--red);"></div>
+                        <div class="zone" style="transform: translateX(-50%) rotate(70deg); background: var(--red);"></div>
+                        <div class="zone" style="transform: translateX(-50%) rotate(90deg); background: var(--red);"></div>
+                    </div>
+                    
+                    <div class="scale-marks" id="scaleMarks"></div>
+                    <div class="needle" id="needle"></div>
+                    <div class="needle-pivot"></div>
+                </div>
+
+                <div class="db-readout">
+                    <div class="db-value-display" id="dbValue">
+                        0<span class="db-unit">dB</span>
+                    </div>
+                    <div class="weighting-badge" id="weighting">A-Gewichtung</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-box">
+                <div class="stat-label">Peak</div>
+                <div class="stat-value" id="peakValue">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Average</div>
+                <div class="stat-value" id="avgValue">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Min</div>
+                <div class="stat-value" id="minValue">0</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-row">
+                <button class="btn btn-start" id="startBtn" onclick="startMeasurement()">
+                    🎙️ Start Messung
+                </button>
+                <button class="btn btn-stop" id="stopBtn" onclick="stopMeasurement()" style="display: none;">
+                    ⏹️ Stop
+                </button>
+            </div>
+            <div class="control-row">
+                <button class="btn btn-secondary" onclick="resetStats()">🔄 Reset</button>
+                <button class="btn btn-secondary" onclick="toggleFullscreen()">⛶ Vollbild</button>
+            </div>
+        </div>
+
+        <div class="settings">
+            <div class="section-header" onclick="toggleSection('needleSettings')">
+                <h3>🎚️ Nadel-Verhalten</h3>
+                <span class="section-toggle" id="needleToggle">▼</span>
+            </div>
+            <div class="collapsible" id="needleSettings">
+                <div class="control-row" style="margin-bottom: 15px;">
+                    <button class="btn btn-preset btn-secondary" onclick="setPreset('fast')">⚡ Schnell</button>
+                    <button class="btn btn-preset btn-secondary" onclick="setPreset('medium')">🎯 Medium</button>
+                    <button class="btn btn-preset btn-secondary" onclick="setPreset('slow')">🐌 Langsam</button>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">
+                        <span>Trägheit (Inertia)</span>
+                        <span class="setting-value" id="inertiaValue">0.08</span>
+                    </label>
+                    <input type="range" class="slider" id="inertiaSlider" 
+                           min="0.01" max="0.20" step="0.01" value="0.08" 
+                           oninput="updateInertia(this.value)">
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">
+                        <span>Dämpfung (Damping)</span>
+                        <span class="setting-value" id="dampingValue">0.15</span>
+                    </label>
+                    <input type="range" class="slider" id="dampingSlider" 
+                           min="0.05" max="0.40" step="0.01" value="0.15" 
+                           oninput="updateDamping(this.value)">
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">
+                        <span>Glättung (Smoothing)</span>
+                        <span class="setting-value" id="smoothingValue">8</span>
+                    </label>
+                    <input type="range" class="slider" id="smoothingSlider" 
+                           min="2" max="20" step="1" value="8" 
+                           oninput="updateSmoothing(this.value)">
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">Gewichtung</label>
+                <div class="switch-group">
+                    <button class="switch-btn active" id="weightA" onclick="setWeighting('A')">A-Gewichtung</button>
+                    <button class="switch-btn" id="weightC" onclick="setWeighting('C')">C-Gewichtung</button>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">Kalibrierung (dB Offset)</label>
+                <div class="calibration">
+                    <input type="number" id="calibration" value="0" step="0.5" min="-50" max="50">
+                    <button class="btn btn-secondary" onclick="applyCalibration()">Set</button>
+                </div>
+            </div>
+
+            <div class="reference-guide">
+                <h3>📊 Studio Referenz</h3>
+                <div class="reference-item">
+                    <span class="reference-label">Flüstern</span>
+                    <span class="reference-value">~30 dB</span>
+                </div>
+                <div class="reference-item">
+                    <span class="reference-label">Unterhaltung</span>
+                    <span class="reference-value">~60 dB</span>
+                </div>
+                <div class="reference-item">
+                    <span class="reference-label">Mastering (ITU BS.1770)</span>
+                    <span class="reference-value">79 dB</span>
+                </div>
+                <div class="reference-item">
+                    <span class="reference-label">Mixing (ITU BS.1116)</span>
+                    <span class="reference-value">85 dB</span>
+                </div>
+                <div class="reference-item">
+                    <span class="reference-label">Gehörschaden-Risiko</span>
+                    <span class="reference-value">>85 dB</span>
+                </div>
+                <div class="reference-item">
+                    <span class="reference-label">Schmerzgrenze</span>
+                    <span class="reference-value">~120 dB</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="status" id="status">Bereit zum Messen – Dr. Eule wartet auf dich! 🦉</div>
+
+        <div class="footer">
+            <div class="footer-content">
+                <div class="made-by">Made with ❤️ by</div>
+                <a href="https://open.spotify.com/artist/5nIpD6gw8jKO9TrZBQKZvs" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="spotify-link">
+                    <span class="spotify-icon">🎵</span>
+                    <span>Doktor Eule auf Spotify</span>
+                </a>
+                <div class="footer-note">Kostenlos & Open Source • Version 1.0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let audioContext;
+        let analyser;
+        let microphone;
+        let dataArray;
+        let animationId;
+        let isRunning = false;
+        let peakDb = 0;
+        let minDb = 999;
+        let avgDb = 0;
+        let sampleCount = 0;
+        let calibrationOffset = 0;
+        let currentWeighting = 'A';
+        
+        let targetAngle = -90;
+        let currentAngle = -90;
+        let needleVelocity = 0;
+        let needleHistory = [];
+        let NEEDLE_INERTIA = 0.08;
+        let NEEDLE_DAMPING = 0.15;
+        let SMOOTHING_SAMPLES = 8;
+
+        function generateScale() {
+            const scaleMarks = document.getElementById('scaleMarks');
+            const majorValues = [30, 40, 50, 60, 70, 79, 85, 90, 100, 110, 120];
+            const startAngle = -90;
+            const endAngle = 90;
+            const range = endAngle - startAngle;
+            
+            for (let i = 30; i <= 120; i++) {
+                const percentage = (i - 30) / 90;
+                const angle = startAngle + (range * percentage);
+                const mark = document.createElement('div');
+                
+                if (majorValues.includes(i)) {
+                    mark.className = 'scale-mark major';
+                    
+                    const label = document.createElement('div');
+                    label.className = 'scale-label';
+                    label.textContent = i;
+                    const labelAngle = angle * Math.PI / 180;
+                    const radius = 115;
+                    const x = Math.sin(labelAngle) * radius;
+                    const y = -Math.cos(labelAngle) * radius;
+                    label.style.transform = `translate(${x}px, ${y}px) translateX(-50%)`;
+                    scaleMarks.appendChild(label);
+                } else if (i % 5 === 0) {
+                    mark.className = 'scale-mark minor';
+                } else {
+                    mark.className = 'scale-mark';
+                }
+                
+                mark.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+                scaleMarks.appendChild(mark);
+            }
+        }
+
+        generateScale();
+
+        function updateInertia(value) {
+            NEEDLE_INERTIA = parseFloat(value);
+            document.getElementById('inertiaValue').textContent = value;
+        }
+
+        function updateDamping(value) {
+            NEEDLE_DAMPING = parseFloat(value);
+            document.getElementById('dampingValue').textContent = value;
+        }
+
+        function updateSmoothing(value) {
+            SMOOTHING_SAMPLES = parseInt(value);
+            document.getElementById('smoothingValue').textContent = value;
+            needleHistory = needleHistory.slice(-SMOOTHING_SAMPLES);
+        }
+
+        function setPreset(type) {
+            if (type === 'fast') {
+                updateInertia(0.15);
+                updateDamping(0.25);
+                updateSmoothing(4);
+                document.getElementById('inertiaSlider').value = 0.15;
+                document.getElementById('dampingSlider').value = 0.25;
+                document.getElementById('smoothingSlider').value = 4;
+            } else if (type === 'medium') {
+                updateInertia(0.08);
+                updateDamping(0.15);
+                updateSmoothing(8);
+                document.getElementById('inertiaSlider').value = 0.08;
+                document.getElementById('dampingSlider').value = 0.15;
+                document.getElementById('smoothingSlider').value = 8;
+            } else if (type === 'slow') {
+                updateInertia(0.04);
+                updateDamping(0.10);
+                updateSmoothing(15);
+                document.getElementById('inertiaSlider').value = 0.04;
+                document.getElementById('dampingSlider').value = 0.10;
+                document.getElementById('smoothingSlider').value = 15;
+            }
+            document.getElementById('status').textContent = `🎚️ Preset "${type}" aktiviert`;
+        }
+
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const toggle = document.getElementById('needleToggle');
+            section.classList.toggle('open');
+            toggle.classList.toggle('open');
+        }
+
+        async function startMeasurement() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    } 
+                });
+                
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                
+                analyser.fftSize = 2048;
+                analyser.smoothingTimeConstant = 0.5;
+                microphone.connect(analyser);
+                
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                
+                isRunning = true;
+                needleHistory = [];
+                document.getElementById('startBtn').style.display = 'none';
+                document.getElementById('stopBtn').style.display = 'block';
+                document.getElementById('status').textContent = '🦉 Dr. Eule analysiert...';
+                document.getElementById('status').className = 'status active';
+                
+                updateMeter();
+                animateNeedle();
+            } catch (error) {
+                console.error('Mikrofonzugriff fehlgeschlagen:', error);
+                document.getElementById('status').textContent = '❌ Fehler: Mikrofonzugriff verweigert';
+                document.getElementById('status').className = 'status error';
+                alert('Bitte erlauben Sie den Mikrofonzugriff in den Browser-Einstellungen.');
+            }
+        }
+
+        function stopMeasurement() {
+            isRunning = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            if (microphone) {
+                microphone.disconnect();
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+            
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('status').textContent = '🦉 Messung gestoppt';
+            document.getElementById('status').className = 'status';
+        }
+
+        function updateMeter() {
+            if (!isRunning) return;
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            let sum = 0;
+            let weightedSum = 0;
+            
+            for (let i = 0; i < dataArray.length; i++) {
+                const freq = (i * audioContext.sampleRate) / (2 * analyser.fftSize);
+                const weight = getWeightingFactor(freq, currentWeighting);
+                const value = dataArray[i] / 255.0;
+                sum += value * value;
+                weightedSum += (value * value) * weight;
+            }
+            
+            const rms = Math.sqrt(weightedSum / dataArray.length);
+            let db = 20 * Math.log10(rms) + 100 + calibrationOffset;
+            db = Math.max(0, Math.min(130, db));
+            
+            needleHistory.push(db);
+            if (needleHistory.length > SMOOTHING_SAMPLES) {
+                needleHistory.shift();
+            }
+            const smoothedDb = needleHistory.reduce((a, b) => a + b, 0) / needleHistory.length;
+            
+            targetAngle = -90 + ((smoothedDb - 30) / 90) * 180;
+            targetAngle = Math.max(-90, Math.min(90, targetAngle));
+            
+            if (db > peakDb) peakDb = db;
+            if (db < minDb && db > 0) minDb = db;
+            sampleCount++;
+            avgDb = ((avgDb * (sampleCount - 1)) + db) / sampleCount;
+            
+            document.getElementById('dbValue').innerHTML = 
+                Math.round(smoothedDb) + '<span class="db-unit">dB</span>';
+            
+            document.getElementById('peakValue').textContent = Math.round(peakDb);
+            document.getElementById('avgValue').textContent = Math.round(avgDb);
+            document.getElementById('minValue').textContent = minDb === 999 ? 0 : Math.round(minDb);
+            
+            const alert = document.getElementById('alert');
+            if (smoothedDb > 85) {
+                alert.classList.add('show');
+            } else {
+                alert.classList.remove('show');
+            }
+            
+            animationId = requestAnimationFrame(updateMeter);
+        }
+
+        function animateNeedle() {
+            if (!isRunning) return;
+            
+            const angleError = targetAngle - currentAngle;
+            const acceleration = angleError * NEEDLE_INERTIA;
+            
+            needleVelocity += acceleration;
+            needleVelocity *= (1 - NEEDLE_DAMPING);
+            
+            currentAngle += needleVelocity;
+            
+            const needle = document.getElementById('needle');
+            needle.style.transition = 'none';
+            needle.style.transform = `translateX(-50%) rotate(${currentAngle}deg)`;
+            
+            requestAnimationFrame(animateNeedle);
+        }
+
+        function getWeightingFactor(freq, type) {
+            if (type === 'C') {
+                const f2 = freq * freq;
+                const c1 = 20.6 * 20.6;
+                const c2 = 12200 * 12200;
+                return (c2 * f2) / ((f2 + c1) * (f2 + c2));
+            } else {
+                const f2 = freq * freq;
+                const a1 = 20.6 * 20.6;
+                const a2 = 107.7 * 107.7;
+                const a3 = 737.9 * 737.9;
+                const a4 = 12200 * 12200;
+                return (a4 * f2 * f2) / ((f2 + a1) * Math.sqrt(f2 + a2) * Math.sqrt(f2 + a3) * (f2 + a4));
+            }
+        }
+
+        function setWeighting(type) {
+            currentWeighting = type;
+            document.getElementById('weightA').classList.toggle('active', type === 'A');
+            document.getElementById('weightC').classList.toggle('active', type === 'C');
+            document.getElementById('weighting').textContent = 
+                type === 'A' ? 'A-Gewichtung' : 'C-Gewichtung';
+        }
+
+        function applyCalibration() {
+            calibrationOffset = parseFloat(document.getElementById('calibration').value);
+            document.getElementById('status').textContent = 
+                `🦉 Kalibrierung: ${calibrationOffset > 0 ? '+' : ''}${calibrationOffset} dB`;
+        }
+
+        function resetStats() {
+            peakDb = 0;
+            minDb = 999;
+            avgDb = 0;
+            sampleCount = 0;
+            needleHistory = [];
+            document.getElementById('peakValue').textContent = '0';
+            document.getElementById('avgValue').textContent = '0';
+            document.getElementById('minValue').textContent = '0';
+            document.getElementById('status').textContent = '🔄 Statistiken zurückgesetzt';
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>
